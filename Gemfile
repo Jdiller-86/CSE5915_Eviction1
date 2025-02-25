@@ -99,4 +99,4 @@ gem "http_parser.rb", "~> 0.6.0", platforms: [ :jruby ]
 gem "dotenv-rails"
 
 # for frontend to add icons
-gem "font-awesome-sass", "~> 6.4.2"
+gem "font-awesome-sass", "~> 6.7.2"
