@@ -64,12 +64,6 @@ Follow the [GoRails Windows 10 setup](https://gorails.com/setup/windows) (includ
 a. Install the WSL extension and SQL Server extensions.  
 b. Open a new VS Code window with the command:
 
-```!whitespace-pre
-sh
-```
-
-CopyEdit
-
 `code .`
 
 #### 3\. Set Up Git & Permissions
