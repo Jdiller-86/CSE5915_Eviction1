@@ -1,2 +1,0 @@
-class Mediator < ApplicationRecord
-end
