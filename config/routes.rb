@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   get "documents/:id/view", to: "documents#show", as: "view_file"
 
   get "documents/generate", to: "documents#generate", as: "generate_file"
+  get "documents/landlord_index", to: "documents#landlord_index", as: "landlord_documents"
 
   post "documents/select_template", to: "documents#select_template", as: "select_template"
 

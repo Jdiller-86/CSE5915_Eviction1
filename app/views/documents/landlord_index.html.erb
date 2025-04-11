@@ -2,7 +2,7 @@
   <h1>Landlord Documents</h1>
   <p>Welcome back, <%= @user.FName %>! Here you can view or download your submitted documents.</p>
 
-  <% if @files.any? %>
+  <% if @files.present? %>
     <table class="documents-table">
       <thead>
         <tr>

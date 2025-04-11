@@ -1,3 +1,6 @@
+require "docx_templater"
+require "docsplit"
+
 class DocumentsController < ApplicationController
   before_action :require_login
   before_action :set_user
@@ -21,13 +24,77 @@ class DocumentsController < ApplicationController
 
   # Handles submission of the form and generates the filled document
   def generate_filled_template
-    # params for the form/generaton WIP but we will see
-    filled_data = params.permit(:conversation_id, :fname, :lname, :address, :landlord_name, :money_owed, :date_due, :payable_today, :monthly_rent, :reason)
-    # Test:
-    logger.info "Received filled template data: #{filled_data.to_h}"
+    conversation = PrimaryMessageGroup.find_by(ConversationID: params[:conversation_id])
+    landlord = User.find_by(UserID: conversation.LandlordID)
+    intake = IntakeQuestion.find_by(IntakeID: conversation.IntakeID)
+    user_role = @user.Role
 
-    # Test:
-    redirect_to root_path, notice: "Document generation coming soon!"
+    # This was is just a test, to see how it would work.
+    file_id = SecureRandom.uuid
+
+    # Choose correct template
+    if intake.BestOption == "Move Out"
+      template_name = "Formatted Agreement to Vacate.docx"
+    elsif intake.BestOption == "Pay Missed Rent"
+      template_name = "Formatted Pay and Stay Negotiated Agreement.docx"
+    else
+      render plain: "No template available for this intake option.", status: :unprocessable_entity
+      return
+    end
+
+    template_path = Rails.root.join("public", "templates", template_name)
+    filled_docx_path = Rails.root.join("public", "userFiles", "#{file_id}.docx")
+    filled_pdf_path = Rails.root.join("public", "userFiles", "#{file_id}.pdf")
+
+    # Build data for the docx template
+    data = {
+      landlord_name: params[:landlord_name],
+      tenant_name: params[:fname],
+      tenant_address: params[:address],
+      landlord_company: landlord.CompanyName.to_s,
+      negotiation_date: params[:negotiation_date],
+      additional_provisions: params[:additional_provisions]
+    }
+
+    if user_role == "Tenant"
+      data[:tenant_signature] = params[:tenant_signature]
+    else
+      data[:landlord_signature] = params[:landlord_signature]
+    end
+
+    j = 5
+
+    if intake.BestOption == "Move Out"
+      j = 6
+    end
+
+    # Payment plan
+    (1..j).each do |i|
+      data[:"amount#{i}"] = params[:"amount#{i}"].to_s
+      data[:"date#{i}"] = params[:"date#{i}"].to_s
+    end
+
+    # Fill the DOCX template using the gem's API
+    buffer = DocxTemplater.new.replace_file_with_content(template_path.to_s, data)
+
+    # Save filled document
+    File.open(filled_docx_path.to_s, "wb") { |f| f.write(buffer.string) }
+    # unless File.exist?(filled_docx_path)
+    # logger.error "DOCX generation failed"
+    # render plain: "Document generation failed", status: :internal_server_error
+    # return
+    # end
+
+    Docsplit.extract_pdf("public/userFiles/#{file_id}.docx", output: "public/userFiles")
+
+    FileDraft.create!(
+      FileName: "#{file_id}",
+      FileTypes: "pdf",
+      FileURLPath: "userFiles/#{file_id}.pdf",
+      CreatorID: @user.UserID
+    )
+
+    redirect_to user_role == "Tenant" ? documents_path : landlord_documents_path, notice: "Document generated successfully."
   end
 
 

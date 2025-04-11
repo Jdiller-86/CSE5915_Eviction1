@@ -115,6 +115,7 @@ GEM
     dnsruby (1.72.3)
       base64 (~> 0.2.0)
       simpleidn (~> 0.2.1)
+    docsplit (0.7.6)
     docx_templater (0.2.3)
       htmlentities (~> 4.3.1)
       rubyzip (~> 1.1)
@@ -612,6 +613,7 @@ DEPENDENCIES
   brakeman
   capybara
   debug
+  docsplit
   docx_templater
   dotenv-rails
   font-awesome-sass (~> 6.4.2)
