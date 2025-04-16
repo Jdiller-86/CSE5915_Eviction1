@@ -1,1 +1,19 @@
+development:
+  adapter: sqlserver
+  host: '127.0.0.1'  # Use the Windows IP instead of 127.0.0.1
+  port: 1433
+  database: EVICTION_TEST
+  username: 'sa'
+  password: 'WrgI1792'
+  trust_server_certificate: true
+  timeout: 5000
 
+test:
+  adapter: sqlserver
+  host: '127.0.0.1'  # Use the Windows IP instead of 127.0.0.1
+  port: 1433
+  database: EVICTION_TESTING
+  username: 'sa'
+  password: 'WrgI1792'
+  trust_server_certificate: true
+  timeout: 5000
