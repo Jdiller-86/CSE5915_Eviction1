@@ -1,3 +1,4 @@
+
 # syntax=docker/dockerfile:1
 # check=error=true
 
@@ -19,11 +20,17 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+# Install Node.js and Yarn for asset compilation
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y nodejs yarn && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
 # Set production environment
-ENV RAILS_ENV="production" \
+ENV RAILS_ENV="development" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_WITHOUT="test"
+
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
@@ -44,9 +51,11 @@ COPY . .
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
+# Ensure the bin/rails script is executable
 RUN chmod +x ./bin/rails
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
+# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
+# RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
 
